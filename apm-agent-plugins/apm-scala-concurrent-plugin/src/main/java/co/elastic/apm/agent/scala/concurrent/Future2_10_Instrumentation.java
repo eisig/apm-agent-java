@@ -56,7 +56,7 @@ public abstract class Future2_10_Instrumentation extends TracerAwareInstrumentat
     }
     @Override
     public boolean indyPlugin() {
-        return false;
+        return true;
     }
 
     public static class ConstructorInstrumentation extends Future2_10_Instrumentation {
@@ -71,7 +71,7 @@ public abstract class Future2_10_Instrumentation extends TracerAwareInstrumentat
             return isConstructor();
         }
 
-        @Advice.OnMethodExit(suppress = Throwable.class)
+        @Advice.OnMethodExit(suppress = Throwable.class, inline = false)
         public static void onExit(@Advice.This Object thiz) {
             final AbstractSpan<?> context = tracer.getActive();
             if (context != null) {
@@ -97,9 +97,9 @@ public abstract class Future2_10_Instrumentation extends TracerAwareInstrumentat
         }
 
         @VisibleForAdvice
-        @Advice.OnMethodEnter(suppress = Throwable.class)
+        @Advice.OnMethodEnter(suppress = Throwable.class, inline = false)
         public static void onEnter(@Advice.This Object thiz, @Nullable @Advice.Local("context") AbstractSpan<?> context) {
-            context = FutureInstrumentation.promisesToContext.remove(thiz);
+            context = promisesToContext.remove(thiz);
             if (context != null) {
                 context.activate();
                 // decrements the reference we incremented to avoid that the parent context gets recycled before the promise is run
@@ -108,7 +108,7 @@ public abstract class Future2_10_Instrumentation extends TracerAwareInstrumentat
             }
         }
 
-        @Advice.OnMethodExit(suppress = Throwable.class)
+        @Advice.OnMethodExit(suppress = Throwable.class, inline = false)
         public static void onExit(@Nullable @Advice.Local("context") AbstractSpan<?> context) {
             if (context != null) {
                 context.deactivate();

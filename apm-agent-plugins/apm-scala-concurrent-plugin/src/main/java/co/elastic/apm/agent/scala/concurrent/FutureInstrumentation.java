@@ -58,7 +58,7 @@ public abstract class FutureInstrumentation extends TracerAwareInstrumentation {
 
     @Override
     public boolean indyPlugin() {
-        return false;
+        return true;
     }
 
     public static class ConstructorInstrumentation extends FutureInstrumentation {
@@ -73,7 +73,7 @@ public abstract class FutureInstrumentation extends TracerAwareInstrumentation {
             return isConstructor();
         }
 
-        @Advice.OnMethodExit(suppress = Throwable.class)
+        @Advice.OnMethodExit(suppress = Throwable.class, inline = false)
         public static void onExit(@Advice.This Object thiz) {
             final AbstractSpan<?> context = tracer.getActive();
             if (context != null) {
@@ -99,7 +99,7 @@ public abstract class FutureInstrumentation extends TracerAwareInstrumentation {
         }
 
         @VisibleForAdvice
-        @Advice.OnMethodEnter(suppress = Throwable.class)
+        @Advice.OnMethodEnter(suppress = Throwable.class, inline = false)
         public static void onEnter(@Advice.This Object thiz, @Nullable @Advice.Local("context") AbstractSpan<?> context) {
             context = promisesToContext.remove(thiz);
             if (context != null) {
@@ -110,7 +110,7 @@ public abstract class FutureInstrumentation extends TracerAwareInstrumentation {
             }
         }
 
-        @Advice.OnMethodExit(suppress = Throwable.class)
+        @Advice.OnMethodExit(suppress = Throwable.class, inline = false)
         public static void onExit(@Nullable @Advice.Local("context") AbstractSpan<?> context) {
             if (context != null) {
                 context.deactivate();
