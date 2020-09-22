@@ -75,7 +75,7 @@ public abstract class Future2_10_Instrumentation extends TracerAwareInstrumentat
         public static void onExit(@Advice.This Object thiz) {
             final AbstractSpan<?> context = tracer.getActive();
             if (context != null) {
-                FutureInstrumentation.promisesToContext.put(thiz, context);
+                promisesToContext.put(thiz, context);
                 // this span might be ended before the Promise$Transformation#run method starts
                 // we have to avoid that this span gets recycled, even in the above mentioned case
                 context.incrementReferences();
